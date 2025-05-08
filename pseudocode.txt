@@ -1,0 +1,123 @@
+INITIALIZE inventory as an empty dictionary
+
+FUNCTION get_valid_medicine_name(name)
+    IF name is empty THEN
+        RETURN "❌ Medicine name cannot be empty."
+    ELSE IF name consists only of digits THEN
+        RETURN "❌ Medicine name should not be only numbers."
+    END IF
+    RETURN None
+
+FUNCTION get_valid_quantity(quantity_input)
+    IF quantity_input is not a positive integer THEN
+        RETURN "❌ Quantity must be a positive integer."
+    END IF
+    RETURN None
+
+FUNCTION get_valid_expiry_date(expiry_date_input)
+    TRY
+        PARSE expiry_date_input to date format
+        IF expiry_date is in the past THEN
+            RETURN "❌ Expiry date cannot be in the past."
+        END IF
+    EXCEPTION ValueError
+        RETURN "❌ Invalid date format. Please use YYYY-MM-DD."
+    END TRY
+    RETURN None
+
+FUNCTION add_medicine()
+    SET name to value from name_entry
+    SET quantity_input to value from quantity_entry
+    SET expiry_date_input to value from expiry_date_entry
+
+    INITIALIZE errors as an empty list
+
+    IF get_valid_medicine_name(name) is not None THEN
+        ADD error to errors
+    END IF
+    IF get_valid_quantity(quantity_input) is not None THEN
+        ADD error to errors
+    END IF
+    IF get_valid_expiry_date(expiry_date_input) is not None THEN
+        ADD error to errors
+    END IF
+
+    IF errors is not empty THEN
+        DISPLAY error messages
+        RETURN
+    END IF
+
+    SET quantity to integer value of quantity_input
+    IF name exists in inventory THEN
+        INCREMENT inventory[name]['quantity'] by quantity
+        UPDATE inventory[name]['expiry_date'] to expiry_date_input
+        DISPLAY success message for updating medicine
+    ELSE
+        ADD new medicine to inventory with quantity and expiry_date
+        DISPLAY success message for adding medicine
+    END IF
+
+    CALL clear_entries()
+
+FUNCTION display_inventory()
+    IF inventory is empty THEN
+        DISPLAY message that inventory is empty
+        RETURN
+    END IF
+
+    INITIALIZE inventory_list with header
+    FOR each medicine in inventory DO
+        APPEND medicine details to inventory_list
+    END FOR
+
+    DISPLAY inventory_list
+
+FUNCTION dispense_medicine()
+    SET medicine_name to value from name_entry
+    IF medicine_name not in inventory THEN
+        DISPLAY error message that medicine is not found
+        RETURN
+    END IF
+
+    SET quantity_to_dispense to value from quantity_entry
+    IF quantity_to_dispense is not a positive integer THEN
+        DISPLAY error message for invalid quantity
+        RETURN
+    END IF
+
+    SET current_quantity to inventory[medicine_name]['quantity']
+    IF quantity_to_dispense > current_quantity THEN
+        DISPLAY error message for insufficient quantity
+        RETURN
+    END IF
+
+    DECREMENT inventory[medicine_name]['quantity'] by quantity_to_dispense
+    DISPLAY success message for dispensing medicine
+
+    IF inventory[medicine_name]['quantity'] is 0 THEN
+        REMOVE medicine_name from inventory
+        DISPLAY message that medicine is out of stock
+    END IF
+
+    CALL clear_entries()
+
+FUNCTION clear_entries()
+    CLEAR name_entry
+    CLEAR quantity_entry
+    CLEAR expiry_date_entry
+
+INITIALIZE root as Tkinter window
+SET title of root to "SalbaFirS Inventory System"
+
+CREATE label for "Medicine Name"
+CREATE entry for name_entry
+CREATE label for "Quantity"
+CREATE entry for quantity_entry
+CREATE label for "Expiry Date (YYYY-MM-DD)"
+CREATE entry for expiry_date_entry
+
+CREATE button for "Add Medicine" with command to add_medicine
+CREATE button for "Dispense Medicine" with command to dispense_medicine
+CREATE button for "View Inventory" with command to display_inventory
+
+CALL root.mainloop()
