@@ -1,0 +1,76 @@
+START
+
+INITIALIZE root window
+SET window title, size, and background
+
+INITIALIZE inventory as empty list
+
+CREATE UI:
+    - Title label
+    - Search bar and buttons: Search, Show All, Sort by Expiry Date
+    - Table for displaying inventory items
+    - Form inputs: Item Name, Price, Quantity, Expiry Date
+    - Buttons: Add, Update, Clear, Dispense
+
+FUNCTION show_all():
+    CLEAR table
+    FOR each item IN inventory:
+        DISPLAY item in table
+
+FUNCTION search():
+    GET search_term from input
+    FILTER inventory for items that match search_term
+    DISPLAY filtered results in table
+
+FUNCTION sort_by_expiry():
+    SORT inventory by expiry_date
+    CALL show_all()
+
+FUNCTION get_data(event):
+    GET selected row from table
+    SET form fields with data from selected row
+
+FUNCTION validate_inputs():
+    IF item name is empty OR all digits:
+        SHOW error
+        RETURN False
+    IF quantity is not a positive number:
+        SHOW error
+        RETURN False
+    IF expiry date is in wrong format OR in the past:
+        SHOW error
+        RETURN False
+    RETURN True
+
+FUNCTION add_product():
+    IF validate_inputs() is False:
+        EXIT
+    GENERATE new pid
+    GET values from form
+    ADD product to inventory
+    CALL show_all()
+    CALL clear_fields()
+
+FUNCTION update_product():
+    IF validate_inputs() is False:
+        EXIT
+    FIND product in inventory by pid
+    UPDATE its details with form values
+    CALL show_all()
+    CALL clear_fields()
+
+FUNCTION delete_product():
+    GET pid from form
+    REMOVE product from inventory by pid
+    CALL show_all()
+    CALL clear_fields()
+
+FUNCTION clear_fields():
+    CLEAR all form and search inputs
+
+FUNCTION get_current_date():
+    RETURN current date and time as string
+
+RUN application loop
+
+END
